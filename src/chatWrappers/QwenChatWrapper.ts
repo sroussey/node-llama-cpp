@@ -82,6 +82,7 @@ export class QwenChatWrapper extends ChatWrapper {
                                 : "",
                             new SpecialTokensText("<tool_call>"), '\n{"name": "'
                         ]),
+                        prefixAlternateMatches: ['\n{"name": "', '{"name": "'],
                         paramsPrefix: '", "arguments": ',
                         suffix: LlamaText("}\n", new SpecialTokensText("</tool_call>")),
                         emptyCallParamsPlaceholder: {}
@@ -119,6 +120,11 @@ export class QwenChatWrapper extends ChatWrapper {
                     call: {
                         optionalPrefixSpace: true,
                         prefix: LlamaText(new SpecialTokensText("<tool_call>\n<function=")),
+                        prefixAlternateMatches: [
+                            LlamaText(new SpecialTokensText("<function=")),
+                            '{"name": "',
+                            '\n{"name": "'
+                        ],
                         paramsPrefix: ">\n<parameter=params>\n",
                         suffix: LlamaText(new SpecialTokensText("\n</parameter>\n</function>\n</tool_call>")),
                         emptyCallParamsPlaceholder: {}

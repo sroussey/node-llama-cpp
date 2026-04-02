@@ -1,10 +1,49 @@
 import {ChatWrapper} from "../ChatWrapper.js";
-import {ChatWrapperGenerateContextStateOptions, ChatWrapperGeneratedContextState} from "../types.js";
+import {ChatModelFunctions, ChatWrapperGenerateContextStateOptions, ChatWrapperGeneratedContextState, ChatWrapperSettings} from "../types.js";
 import {SpecialToken, LlamaText, SpecialTokensText} from "../utils/LlamaText.js";
+import {ChatModelFunctionsDocumentationGenerator} from "./utils/ChatModelFunctionsDocumentationGenerator.js";
 
 // source: https://github.com/openai/openai-python/blob/120d225b91a8453e15240a49fb1c6794d8119326/chatml.md
 export class ChatMLChatWrapper extends ChatWrapper {
     public readonly wrapperName: string = "ChatML";
+
+    public override readonly settings: ChatWrapperSettings = {
+        supportsSystemMessages: true,
+        functions: {
+            call: {
+                optionalPrefixSpace: true,
+                prefix: '{"name": "',
+                paramsPrefix: '", "parameters": ',
+                suffix: "}",
+                emptyCallParamsPlaceholder: {}
+            },
+            result: {
+                prefix: LlamaText(new SpecialTokensText("\n"), "Result: "),
+                suffix: LlamaText(new SpecialTokensText("\n"))
+            }
+        }
+    };
+
+    public override generateAvailableFunctionsSystemText(availableFunctions: ChatModelFunctions, {documentParams = true}: {
+        documentParams?: boolean
+    }) {
+        const functionsDocumentationGenerator = new ChatModelFunctionsDocumentationGenerator(availableFunctions);
+
+        if (!functionsDocumentationGenerator.hasAnyFunctions)
+            return LlamaText([]);
+
+        return LlamaText.joinValues("\n", [
+            "You have access to the following functions. To call a function, respond with JSON for a function call.",
+            'Respond in the format {"name": function name, "parameters": function call parameters}.',
+            "Do not use variables.",
+            "",
+            functionsDocumentationGenerator.getLlama3_2LightweightFunctionSignatures({documentParams}),
+            "",
+            "After calling a function, the result will appear afterwards and is only visible to you.",
+            "To make information visible to the user, you must include it in your response.",
+            "Only call functions when needed."
+        ]);
+    }
 
     public override generateContextState({
         chatHistory, availableFunctions, documentFunctionParams

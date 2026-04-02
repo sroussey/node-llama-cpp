@@ -29,6 +29,12 @@ export type ChatWrapperSettings = {
             readonly suffix: string | LlamaText,
 
             /**
+             * Alternate prefixes that can be used to detect a function call,
+             * but won't be used to construct the context when building it from scratch.
+             */
+            readonly prefixAlternateMatches?: ReadonlyArray<string | LlamaText>,
+
+            /**
              * The value to use when the function has no arguments.
              *
              * Will be stringified using `jsonDumps`.

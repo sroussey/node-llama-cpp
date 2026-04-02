@@ -1930,15 +1930,19 @@ class GenerateResponseState<const Functions extends ChatModelFunctions | undefin
                 this.chatWrapper.settings.functions?.parallelism?.call?.sectionPrefix ?? "",
                 ...(this.chatWrapper.settings.functions?.parallelism?.call.sectionPrefixAlternateMatches ?? [])
             ])
-                this.functionSyntaxStartDetector.addStopTrigger(
-                    StopGenerationDetector.resolveLlamaTextTrigger(
-                        LlamaText([
-                            sectionPrefix,
-                            this.chatWrapper.settings.functions.call.prefix
-                        ]),
-                        this.llamaChat.model.tokenizer
-                    )
-                );
+                for (const callPrefix of [
+                    this.chatWrapper.settings.functions.call.prefix,
+                    ...(this.chatWrapper.settings.functions.call.prefixAlternateMatches ?? [])
+                ])
+                    this.functionSyntaxStartDetector.addStopTrigger(
+                        StopGenerationDetector.resolveLlamaTextTrigger(
+                            LlamaText([
+                                sectionPrefix,
+                                callPrefix
+                            ]),
+                            this.llamaChat.model.tokenizer
+                        )
+                    );
         }
 
         const segmentDefinitions: ConstructorParameters<typeof SegmentHandler>[0]["segmentDefinitions"] = new Map();
@@ -1968,15 +1972,19 @@ class GenerateResponseState<const Functions extends ChatModelFunctions | undefin
                 this.chatWrapper.settings.functions?.parallelism?.call?.sectionPrefix ?? "",
                 ...(this.chatWrapper.settings.functions?.parallelism?.call.sectionPrefixAlternateMatches ?? [])
             ])
-                this.stopGenerationDetector.addStopTrigger(
-                    StopGenerationDetector.resolveLlamaTextTrigger(
-                        LlamaText([
-                            sectionPrefix,
-                            this.chatWrapper.settings.functions.call.prefix
-                        ]),
-                        this.llamaChat.model.tokenizer
-                    )
-                );
+                for (const callPrefix of [
+                    this.chatWrapper.settings.functions.call.prefix,
+                    ...(this.chatWrapper.settings.functions.call.prefixAlternateMatches ?? [])
+                ])
+                    this.stopGenerationDetector.addStopTrigger(
+                        StopGenerationDetector.resolveLlamaTextTrigger(
+                            LlamaText([
+                                sectionPrefix,
+                                callPrefix
+                            ]),
+                            this.llamaChat.model.tokenizer
+                        )
+                    );
 
             for (const segmentType of allSegmentTypes) {
                 const segmentDefinition = getChatWrapperSegmentDefinition(this.chatWrapper.settings, segmentType);
